@@ -3,8 +3,8 @@ const { cmd, commands } = require('../command');
 const axios = require('axios');
 
 cmd({
-    pattern: "vortex",
-    alias: ["ai2", "hanstech"],
+    pattern: "gpt",
+    alias: ["ai", "ask"],
     use: ".gpt <your message>",
     desc: "Chat with GPT AI",
     category: "ai",
@@ -15,19 +15,18 @@ async (conn, mek, m, { from, text, sender, reply }) => {
     try {
         if (!text) return reply("Please enter a message to ask the AI.");
 
-        // Send reaction emoji
+        // Send emoji reaction
         await conn.sendMessage(from, {
             react: { text: '🤖', key: mek.key }
         });
 
-        // Initialize user chat history
+        // Store user chat history
         if (!global.userChats) global.userChats = {};
         if (!global.userChats[sender]) global.userChats[sender] = [];
 
-        // Save message to history
         global.userChats[sender].push(`User: ${text}`);
         if (global.userChats[sender].length > 15) {
-            global.userChats[sender].shift(); // Keep only last 15 messages
+            global.userChats[sender].shift(); // Keep max 15 messages
         }
 
         const userHistory = global.userChats[sender].join("\n");
@@ -56,38 +55,39 @@ ${userHistory}
 
         // Get GPT response
         const { data } = await axios.get("https://mannoffc-x.hf.space/ai/logic", {
-            params: {
-                q: text,
-                logic: prompt
-            }
+            params: { q: text, logic: prompt }
         });
 
         const botResponse = data?.result || "Sorry, I couldn't understand your question.";
 
-        // Save response to history
+        // Store bot response
         global.userChats[sender].push(`Bot: ${botResponse}`);
 
-        // Get user's profile picture
+        // Get user profile picture or fallback
         let profilePic;
         try {
             profilePic = await conn.profilePictureUrl(sender, 'image');
-        } catch (err) {
+        } catch {
             profilePic = 'https://files.catbox.moe/di5kdx.jpg'; // Default image
         }
 
-        // Send message with small thumbnail (no double image)
+        // Send AI response message
         await conn.sendMessage(from, {
-            text: `👤 *User:* @${sender.split("@")[0]}\n\n🤖 *𝐕𝐎𝐑𝐓𝐄𝐗-𝐗𝐌𝐃 AI Reply:*\n\n${botResponse}`,
+            text: `👤 *User:* @${sender.split("@")[0]}\n\n🤖 *𝐕𝐎𝐑𝐓𝐄𝐗-𝐗𝐌𝐃 AI REPLY:*\n\n${botResponse}`,
             contextInfo: {
                 mentionedJid: [sender],
-                forwardingScore: 999,
+                forwardingScore: 5,
                 isForwarded: true,
+                forwardedNewsletterMessageInfo: {
+                    newsletterName: "𝐻𝒂𝒏𝒔𝑇𝒆𝒄𝒉",
+                    newsletterJid: "120363352087070233@newsletter"
+                },
                 externalAdReply: {
                     title: "𝐕𝐎𝐑𝐓𝐄𝐗-𝐗𝐌𝐃",
                     body: "Powered by HansTz",
                     thumbnailUrl: profilePic,
                     mediaType: 1,
-                    renderLargerThumbnail: false, // Small thumbnail
+                    renderLargerThumbnail: false, // Small image
                     sourceUrl: global.link || "https://HansTz-tech.vercel.app"
                 }
             }
