@@ -34,6 +34,8 @@ const {
   const StickersTypes = require('wa-sticker-formatter')
   const util = require('util')
   const { sms, downloadMediaMessage, AntiDelete } = require('./lib')
+  const handleAntiCall = require('./Hans_Tz/anticall.js'); // path as per your project
+handleAntiCall(conn);
   const FileType = require('file-type');
   const axios = require('axios')
   const { File } = require('megajs')
