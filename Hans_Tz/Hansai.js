@@ -4,7 +4,7 @@ const axios = require('axios');
 
 cmd({
     pattern: "gpt",
-    alias: ["ai", "ask"],
+    alias: ["hansai", "ai"],
     use: ".gpt <your message>",
     desc: "Chat with GPT AI",
     category: "ai",
