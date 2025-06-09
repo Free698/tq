@@ -1,29 +1,28 @@
-const config = require('../config');
+const config = require('../config'); // Make sure this path is correct
 
-module.exports = (conn) => {
-    conn.ws.on('CB:call', async (json) => {
-        if (config.ANTICALL !== 'true') return;
+// === ANTICALL FEATURE ===
+if (config.ANTICALL === 'true') {
+  conn.ws.on('CB:call', async (json) => {
+    const callerId = json.content?.[0]?.attrs?.from;
+    const callType = json.content?.[0]?.tag;
 
-        const callerId = json.content[0]?.attrs?.from;
-        const callType = json.content[0]?.tag;
+    if (callType === 'offer' && callerId) {
+      console.log(`[📞] Incoming call from: ${callerId}`);
 
-        if (callType === 'offer' && callerId) {
-            console.log(`[⚠️] Incoming call from ${callerId}`);
+      try {
+        // Send a warning message to the caller
+        await conn.sendMessage(callerId, {
+          text: `🚫 *Calling the bot is not allowed!*\n\nPlease avoid calling this number. Your messages may be ignored if you continue.`,
+        });
 
-            try {
-                // Send a warning message
-                await conn.sendMessage(callerId, {
-                    text: `🚫 *Calling the bot is not allowed!*\n\nPlease avoid calling the bot or you may get ignored.`,
-                });
-
-                // Try to reject the call (if supported)
-                if (conn.rejectCall) {
-                    await conn.rejectCall(callerId);
-                }
-
-            } catch (err) {
-                console.error('[❌] Failed to handle incoming call:', err);
-            }
+        // Reject the call (if supported by your library)
+        if (typeof conn.rejectCall === 'function') {
+          await conn.rejectCall(callerId);
         }
-    });
-};
+
+      } catch (err) {
+        console.error('❌ Error handling incoming call:', err);
+      }
+    }
+  });
+}
