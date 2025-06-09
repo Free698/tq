@@ -70,9 +70,7 @@ ALWAYS_ONLINE: process.env.ALWAYS_ONLINE || "false",
 PUBLIC_MODE: process.env.PUBLIC_MODE || "true",
 // make false if want private mod
 AUTO_TYPING: process.env.AUTO_TYPING || "false",
-//AUTOMATICALLY TYPING 
-ANTICALL: process.env.ANTICALL || "true",
-//make false if want anticall 
+// true for automatic show typing   
 READ_CMD: process.env.READ_CMD || "false",
 // true if want mark commands as read 
 DEV: process.env.DEV || "255614195217",

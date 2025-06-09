@@ -26,11 +26,6 @@
       "required": false,
       "value": "public"
      },
-     "ANTICALL": {
-      "description": "Reject incoming calls make true to active false to deactivate.",
-      "required": false,
-      "value": "false"
-     },
     "ANTI_DELETE": {
       "description": "set true for show deleted messages.",
       "required": false,
