@@ -50,7 +50,7 @@ async (conn, mek, m, { from, text, sender, reply }) => {
                     newsletterJid: "120363352087070233@newsletter",
                 },
                 externalAdReply: {
-                    title: "ʜᴀɴs-xᴍᴅ",
+                    title: "𝐕𝐎𝐑𝐓𝐄𝐗-𝐗𝐌𝐃",
                     body: `HANSTZ`,
                     thumbnailUrl: songData.thumbnail || 'https://files.catbox.moe/fbfo1y.jpg',
                     sourceUrl: global.link,
@@ -80,7 +80,7 @@ async (conn, mek, m, { from, text, sender, reply }) => {
                     newsletterJid: "120363352087070233@newsletter",
                 },
                 externalAdReply: {
-                    title: "ʜᴀɴs-xᴍᴅ",
+                    title: "𝐕𝐎𝐑𝐓𝐄𝐗-𝐗𝐌𝐃",
                     body: `${songData.title}.mp3`,
                     thumbnailUrl: songData.thumbnail || 'https://files.catbox.moe/fbfo1y.jpg',
                     mediaType: 1,
