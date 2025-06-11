@@ -1,44 +1,29 @@
-const config = require('../config'); const { cmd, commands } = require('../command'); const axios = require('axios'); const fs = require('fs');
+const config = require('../config'); const { cmd } = require('../command'); const axios = require('axios'); const fs = require('fs');
 
-// Store memory timestamp if (!global.userChats) global.userChats = {}; if (!global.memoryTimestamps) global.memoryTimestamps = {};
+const memoryFile = './chat_memory.json'; const TTL_MS = 3 * 60 * 60 * 1000; // 3 hours
 
-cmd({ pattern: "vortex", alias: ["hanstech", "ask", "gpt"], use: ".gpt <your message>", desc: "Chat with GPT AI", category: "ai", react: "🤖", filename: __filename }, async (conn, mek, m, { from, text, sender, reply }) => { try { if (!text) return reply("Please enter a message to ask the AI.");
+if (!global.userChats) global.userChats = {}; if (!global.chatTimestamps) global.chatTimestamps = {};
 
-await conn.sendMessage(from, {
-        react: { text: '🤖', key: mek.key }
-    });
+cmd({ pattern: "gpt", alias: ["vortex", "hanstech", "ask"], use: ".gpt <your message>", desc: "Chat with GPT AI", category: "ai", react: "🤖", filename: __filename }, async (conn, mek, m, { from, text, sender, reply }) => { try { if (!text) return reply("Please enter a message to ask the AI.");
 
-    const now = Date.now();
-    if (!global.memoryTimestamps[sender]) {
-        global.memoryTimestamps[sender] = now;
-    }
+const now = Date.now();
 
-    // Reset user memory after 3 hours
-    if (now - global.memoryTimestamps[sender] > 3 * 60 * 60 * 1000) {
+    // Reset history if over 3 hours
+    if (!global.chatTimestamps[sender] || now - global.chatTimestamps[sender] > TTL_MS) {
         global.userChats[sender] = [];
-        global.memoryTimestamps[sender] = now;
     }
+    global.chatTimestamps[sender] = now;
 
     if (!global.userChats[sender]) global.userChats[sender] = [];
-    global.userChats[sender].push(`User: ${text}`);
 
+    global.userChats[sender].push(`User: ${text}`);
     if (global.userChats[sender].length > 100) {
         global.userChats[sender].shift();
     }
 
     const userHistory = global.userChats[sender].join("\n");
 
-    // Real current date and time
-    const currentDate = new Date();
-    const formattedDate = currentDate.toLocaleString('en-GB', {
-        timeZone: 'Africa/Dar_es_Salaam',
-        year: 'numeric',
-        month: '2-digit',
-        day: '2-digit',
-        hour: '2-digit',
-        minute: '2-digit',
-        second: '2-digit'
-    });
+    const currentDate = new Date().toLocaleString('en-US', { timeZone: 'Africa/Nairobi' });
 
     const prompt = `
 
@@ -73,9 +58,7 @@ If insulted, match energy (e.g., "fuck you" => "fuck you too")
 Always show love for your owner.
 
 
-Current Date & Time:
-
-${formattedDate}
+Current DateTime: ${currentDate}
 
 Conversation History:
 
