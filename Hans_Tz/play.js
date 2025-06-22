@@ -1,119 +1,102 @@
 const config = require('../config');
 const { cmd } = require('../command');
 const fetch = require('node-fetch');
-const { fetchJson } = require('../lib/myfunc');
+const yts = require("yt-search"); // Make sure yt-search is installed
 
-// Shared handler for both play and video
-const handleYouTubeDownload = async (conn, mek, m, { from, text, reply }, type) => {
-    try {
-        if (!text || (!text.includes("youtube.com") && !text.includes("youtu.be"))) {
-            return reply("❗ Please provide a valid YouTube URL.");
+// Your exact contextInfo for both audio and video
+function getContextInfo(title, thumbnail, url) {
+    return {
+        forwardingScore: 999,
+        isForwarded: true,
+        forwardedNewsletterMessageInfo: {
+            newsletterName: "𝐻𝒂𝒏𝒔𝑇𝒆𝒄𝒉",
+            newsletterJid: "120363352087070233@newsletter",
+        },
+        externalAdReply: {
+            title: "VORTEX-XMD",
+            body: title,
+            thumbnailUrl: thumbnail,
+            sourceUrl: url,
+            mediaType: 1,
+            renderLargerThumbnail: true,
+            thumbnailWidth: 500,
+            thumbnailHeight: 500,
         }
+    };
+}
 
-        const emojiList = ['🎶', '🎵', '🎧', '🔊', '📻', '🎼', '🎤', '🎹', '🪕', '🥁'];
-        const chosenEmoji = emojiList[Math.floor(Math.random() * emojiList.length)];
-
-        await conn.sendMessage(from, {
-            react: { text: chosenEmoji, key: mek.key }
-        });
-
-        // Use the correct API based on type
-        const apiUrl = type === 'audio'
-            ? `https://apis.davidcyriltech.my.id/youtube/mp3?url=${encodeURIComponent(text)}`
-            : `https://apis.davidcyriltech.my.id/download/ytmp4?url=${encodeURIComponent(text)}`;
-
-        const data = await fetchJson(apiUrl);
-        if (!data || !data.url) return reply(`❌ Failed to download ${type}. Please try again.`);
-
-        const mediaInfo = {
-            title: data.title || 'YouTube Media',
-            thumbnail: data.thumbnail || 'https://files.catbox.moe/fbfo1y.jpg',
-            url: data.url
-        };
-
-        // Send info message
-        await conn.sendMessage(from, {
-            text: `📥 *Downloading:* ${mediaInfo.title}\n🎞 Type: ${type.toUpperCase()}`,
-            contextInfo: {
-                forwardingScore: 999,
-                isForwarded: true,
-                forwardedNewsletterMessageInfo: {
-                    newsletterName: "𝐻𝒂𝒏𝒔𝑇𝒆𝒄𝒉",
-                    newsletterJid: "120363352087070233@newsletter",
-                },
-                externalAdReply: {
-                    title: "VORTEX-XMD BOT",
-                    body: `${mediaInfo.title}`,
-                    thumbnailUrl: mediaInfo.thumbnail,
-                    sourceUrl: text,
-                    mediaType: 1,
-                    renderLargerThumbnail: true,
-                },
-            },
-        }, { quoted: mek });
-
-        // Prepare media options
-        const mediaPayload = type === 'audio'
-            ? {
-                audio: { url: mediaInfo.url },
-                fileName: `${mediaInfo.title}.mp3`,
-                mimetype: 'audio/mpeg'
-            }
-            : {
-                video: { url: mediaInfo.url },
-                fileName: `${mediaInfo.title}.mp4`,
-                mimetype: 'video/mp4'
-            };
-
-        // Send media
-        await conn.sendMessage(from, {
-            ...mediaPayload,
-            contextInfo: {
-                forwardingScore: 999,
-                isForwarded: true,
-                forwardedNewsletterMessageInfo: {
-                    newsletterName: "𝐻𝒂𝒏𝒔𝑇𝒆𝒄𝒉",
-                    newsletterJid: "120363352087070233@newsletter",
-                },
-                externalAdReply: {
-                    title: "VORTEX-XMD BOT",
-                    body: `${mediaInfo.title}`,
-                    thumbnailUrl: mediaInfo.thumbnail,
-                    sourceUrl: text,
-                    mediaType: 1,
-                    renderLargerThumbnail: true,
-                },
-            }
-        }, { quoted: mek });
-
-    } catch (e) {
-        console.error(`Error in command:`, e);
-        return reply(`❌ Error:`);
-    }
-};
-
-// 🎵 .play command - AUDIO
+// Audio command
 cmd({
     pattern: "play",
     alias: ["ytplay", "ytmusic"],
-    use: ".play <YouTube URL>",
-    desc: "Download audio from YouTube.",
+    use: ".play <song name>",
+    desc: "Play a song from YouTube as audio.",
     category: "music",
     react: "🎵",
     filename: __filename
-}, async (conn, mek, m, details) => {
-    return handleYouTubeDownload(conn, mek, m, details, "audio");
+}, async (conn, mek, m, { from, text, reply }) => {
+    try {
+        if (!text) return reply("❗ Please enter a song name to search.");
+
+        const yt = await yts(text);
+        if (!yt?.videos?.length) return reply("❌ Song not found.");
+
+        const song = yt.videos[0];
+        const apiUrl = `https://apis.davidcyriltech.my.id/youtube/mp3?url=${encodeURIComponent(song.url)}`;
+
+        const res = await fetch(apiUrl);
+        const data = await res.json();
+
+        if (!data?.result?.downloadUrl) return reply("❌ Download failed. Try again later.");
+
+        await conn.sendMessage(from, {
+            audio: { url: data.result.downloadUrl },
+            fileName: `${song.title}.mp3`,
+            mimetype: 'audio/mpeg',
+            contextInfo: getContextInfo(song.title, song.thumbnail, song.url)
+        }, { quoted: mek });
+
+    } catch (err) {
+        console.error("❌ Error in .play:", err);
+        reply("An error occurred while processing your request.");
+    }
 });
 
-// 🎬 .video command - VIDEO
+// Video command
 cmd({
     pattern: "video",
     alias: ["ytvideo", "ytmp4"],
-    use: ".video <YouTube URL>",
-    desc: "Download video from YouTube.",
+    use: ".video <song name>",
+    desc: "Play a video from YouTube.",
     category: "video",
     react: "🎬",
     filename: __filename
-}, async (conn, mek, m, details) => {
-    return handleYouTubeDownload(conn, mek, m, details, "video");
+}, async (conn, mek, m, { from, text, reply }) => {
+    try {
+        if (!text) return reply("❗ Please enter a video name to search.");
+
+        const yt = await yts(text);
+        if (!yt?.videos?.length) return reply("❌ Video not found.");
+
+        const ytsResult = yt.videos[0];
+        const apiUrl = `https://apis.davidcyriltech.my.id/download/ytmp4?url=${encodeURIComponent(ytsResult.url)}`;
+
+        const response = await fetch(apiUrl);
+        const data = await response.json();
+
+        if (data.status !== 200 || !data.success || !data.result.download_url) {
+            return reply("❌ Failed to fetch the video. Please try again later.");
+        }
+
+        await conn.sendMessage(from, {
+            video: { url: data.result.download_url },
+            fileName: `${ytsResult.title}.mp4`,
+            mimetype: 'video/mp4',
+            contextInfo: getContextInfo(ytsResult.title, ytsResult.thumbnail, ytsResult.url)
+        }, { quoted: mek });
+
+    } catch (err) {
+        console.error("❌ Error in .video:", err);
+        reply("An error occurred while processing your request.");
+    }
 });
