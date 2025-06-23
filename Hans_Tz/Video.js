@@ -31,15 +31,6 @@ cmd({
             video: { url: data.result.download_url },
             fileName: `${video.title}.mp4`,
             mimetype: "video/mp4",
-            contextInfo: {
-                mentionedJid: [m.sender],
-                forwardingScore: 5,
-                isForwarded: true,
-                forwardedNewsletterMessageInfo: {
-                    newsletterName: "𝐕𝐎𝐑𝐓𝐄𝐗-𝐗𝐌𝐃",
-                    newsletterJid: "120363352087070233@newsletter"
-                }
-            },
             caption: `🎥 *${video.title}*\n\n⏳ Duration: ${video.timestamp}\n👀 Views: ${video.views}\n📅 Uploaded: ${video.ago}\n\n🔗 ${video.url}`
         }, { quoted: mek });
 
