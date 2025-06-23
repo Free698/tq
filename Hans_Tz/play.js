@@ -49,12 +49,22 @@ cmd({
 
         if (!data?.result?.downloadUrl) return reply("❌ Download failed. Try again later.");
 
+        const fakeQuoted = {
+            key: { fromMe: false, participant: `0@s.whatsapp.net`, remoteJid: 'status@broadcast' },
+            message: {
+                contactMessage: {
+                    displayName: `𝐕𝐎𝐑𝐓𝐄𝐗-𝐗𝐌𝐃`,
+                    vcard: `BEGIN:VCARD\nVERSION:3.0\nN:;𝐕𝐎𝐑𝐓𝐄𝐗-𝐗𝐌𝐃;;;\nFN:𝐕𝐎𝐑𝐓𝐄𝐗-𝐗𝐌𝐃\nitem1.TEL;waid=${m.sender.split('@')[0]}:${m.sender.split('@')[0]}\nitem1.X-ABLabel:Mobile\nEND:VCARD`,
+                },
+            },
+        };
+
         await conn.sendMessage(from, {
             audio: { url: data.result.downloadUrl },
             fileName: `${song.title}.mp3`,
             mimetype: 'audio/mpeg',
             contextInfo: getContextInfo(song.title, song.thumbnail, song.url)
-        }, { quoted: mek });
+        }, { quoted: fakeQuoted });
 
     } catch (err) {
         console.error("❌ Error in .play:", err);
