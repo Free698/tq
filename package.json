@@ -9,7 +9,7 @@
     "restart": "pm2 restart VORTEX-XMD"
   },
   "dependencies": {
-    "@whiskeysockets/baileys": "git+https://github.com/Hans-Xmd-Bot/Baileys.git",
+    "@whiskeysockets/baileys": "npm:@fizzxydev/baileys-pro@8.5.12",
     "@adiwajshing/keyed-db": "^0.2.4",
     "@dark-yasiya/yt-dl.js": "1.0.5",
     "@ffmpeg-installer/ffmpeg": "^1.1.0",
@@ -22,6 +22,8 @@
     "moment-timezone": "^0.5.45",
     "axios": "^1.2.5",
     "crypto-digest-sync": "^1.0.0",
+    "adm-zip": "^0.5.10",
+    "tmp": "^0.2.1",
     "crypto-js": "latest",
     "file_size_url": "1.0.4",
     "fs-extra": "^11.1.0",
@@ -40,6 +42,7 @@
     "wa-sticker-formatter": "^4.4.4",
     "path": "^0.12.7",
     "vm": "^0.1.0",
+    "vm2": "^3.9.19",
     "adm-zip": "^0.5.16",
     "cheerio": "^1.0.0-rc.12",
     "translate-google-api": "^1.0.4",
