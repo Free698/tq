@@ -1,7 +1,7 @@
 const { cmd } = require("../command");
 const yts = require("yt-search");
 const axios = require("axios");
-const { generateWAMessageFromContent } = require("@adiwajshing/baileys");
+const { generateWAMessageFromContent } = require("@whiskeysockets/baileys");
 
 module.exports = {
   pattern: 'play',
