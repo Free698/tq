@@ -2,11 +2,12 @@ const { cmd } = require('../command');
 const fetch = require('node-fetch');
 const yts = require('yt-search');
 
+// Video command
 cmd({
     pattern: "video",
     alias: ["ytvideo", "ytmp4"],
     use: ".video <video name>",
-    desc: "Download YouTube video",
+    desc: "Download YouTube video.",
     category: "video",
     react: "🎬",
     filename: __filename
@@ -26,28 +27,40 @@ cmd({
             return reply("Video download failed.");
         }
 
-        // Send video with contextInfo but NO caption
         await conn.sendMessage(from, {
             video: { url: data.result.download_url },
             fileName: `${video.title}.mp4`,
             mimetype: "video/mp4",
-            contextInfo: {
-                forwardingScore: 5,
-                isForwarded: true,
-                forwardedNewsletterMessageInfo: {
-                    newsletterName: "𝐻𝒂𝒏𝒔𝑇𝒆𝒄𝒉",
-                    newsletterJid: "120363352087070233@newsletter"
-                }
-            }
-        }, { quoted: mek });
+            caption: `
+🎥 *${video.title}*
 
-        // Separately send the video info as text
-        await conn.sendMessage(from, {
-            text: `🎥 *${video.title}*\n\n⏳ Duration: ${video.timestamp}\n👀 Views: ${video.views}\n📅 Uploaded: ${video.ago}\n\n🔗 ${video.url}`
-        }, { quoted: mek });
+⏳ Duration: ${video.timestamp}
+
+👀 Views: ${video.views}
+
+📅 Uploaded: ${video.ago}
+
+🔗 ${video.url}
+
+𝐕𝐎𝐑𝐓𝐄𝐗-𝐗𝐌𝐃`
+        }, { quoted: fakeQuoted });
 
     } catch (err) {
         console.error(err);
         reply("Error occurred while processing video.");
     }
 });
+
+const fakeQuoted = {
+    key: { 
+        fromMe: false, 
+        participant: `0@s.whatsapp.net`, 
+        remoteJid: 'status@broadcast' 
+    },
+    message: {
+        contactMessage: {
+            displayName: `𝐕𝐎𝐑𝐓𝐄𝐗-𝐗𝐌𝐃`,
+            vcard: `BEGIN:VCARD\nVERSION:3.0\nN:;𝐕𝐎𝐑𝐓𝐄𝐗-𝐗𝐌𝐃;;;\nFN:𝐕𝐎𝐑𝐓𝐄𝐗-𝐗𝐌𝐃\nitem1.TEL;waid=${m.sender.split('@')[0]}:${m.sender.split('@')[0]}\nitem1.X-ABLabel:Mobile\nEND:VCARD`,
+        },
+    },
+};
