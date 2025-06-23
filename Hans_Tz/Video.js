@@ -31,7 +31,15 @@ cmd({
             video: { url: data.result.download_url },
             fileName: `${video.title}.mp4`,
             mimetype: "video/mp4",
-            caption: `🎥 *${video.title}*\n\n⏳ Duration: ${video.timestamp}\n👀 Views: ${video.views}\n📅 Uploaded: ${video.ago}\n\n🔗 ${video.url}`
+            caption: `🎥 *${video.title}*\n\n⏳ Duration: ${video.timestamp}\n👀 Views: ${video.views}\n📅 Uploaded: ${video.ago}\n\n🔗 ${video.url}`,
+            contextInfo: {
+                forwardingScore: 5,
+                isForwarded: true,
+                forwardedNewsletterMessageInfo: {
+                    newsletterName: "𝐻𝒂𝒏𝒔𝑇𝒆𝒄𝒉",
+                    newsletterJid: "120363352087070233@newsletter"
+                }
+            }
         }, { quoted: mek });
 
     } catch (err) {
