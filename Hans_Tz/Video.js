@@ -13,37 +13,39 @@ const contextInfo = (m) => ({
 });
 
 cmd({
-    pattern: "play",
-    alias: ["ytplay", "ytmusic"],
-    use: ".play <song name>",
-    desc: "Play a song from YouTube as audio.",
-    category: "music",
-    react: "🎵",
+    pattern: "video",
+    alias: ["ytvideo", "ytmp4"],
+    use: ".video <song name>",
+    desc: "Download YouTube video.",
+    category: "video",
+    react: "🎬",
     filename: __filename
 },
 async (conn, mek, m, { from, text, reply }) => {
     try {
-        if (!text) return reply("Please enter song name.");
+        if (!text) return reply("Please enter video name.");
         
         const yt = await yts(text);
-        const song = yt.videos[0];
-        if (!song) return reply("Song not found.");
+        const video = yt.videos[0];
+        if (!video) return reply("Video not found.");
 
-        const apiUrl = `https://apis.davidcyriltech.my.id/youtube/mp3?url=${encodeURIComponent(song.url)}`;
+        const apiUrl = `https://apis.davidcyriltech.my.id/download/ytmp4?url=${encodeURIComponent(video.url)}`;
         const res = await fetch(apiUrl);
         const data = await res.json();
 
-        if (!data?.result?.downloadUrl) return reply("Audio download failed.");
+        if (data.status !== 200 || !data.success || !data.result.download_url) {
+            return reply("Video download failed.");
+        }
 
         await conn.sendMessage(from, {
-            audio: { url: data.result.downloadUrl },
-            fileName: `${song.title}.mp3`,
-            mimetype: "audio/mpeg",
+            video: { url: data.result.download_url },
+            fileName: `${video.title}.mp4`,
+            mimetype: "video/mp4",
             contextInfo: contextInfo(m)
         }, { quoted: mek });
 
     } catch (err) {
         console.error(err);
-        reply("Error occurred while processing audio.");
+        reply("Error occurred while processing video.");
     }
 });
