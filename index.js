@@ -57,7 +57,7 @@ const clearTempDir = () => {
     for (const file of files) {
       fs.unlink(path.join(tempDir, file), err => {
         if (err) throw err
-      }
+      })
     }
   })
 }
@@ -134,7 +134,10 @@ https://github.com/Mrhanstz/VORTEX-XMD/fork
 
 > © POWERED BY HANSTZ 🚀
 `
-      conn.sendMessage(conn.user.id, { image: { url: `https://raw.githubusercontent.com/Mrhanstz/HansTz-Sever/refs/heads/main/Database/HansTz7.jpg` }, caption: up })
+      conn.sendMessage(conn.user.id, { 
+        image: { url: `https://raw.githubusercontent.com/Mrhanstz/HansTz-Sever/refs/heads/main/Database/HansTz7.jpg` }, 
+        caption: up 
+      })
     }
   })
   conn.ev.on('creds.update', saveCreds)
@@ -158,7 +161,7 @@ https://github.com/Mrhanstz/VORTEX-XMD/fork
   conn.ev.on('messages.upsert', async (mek) => {
     mek = mek.messages[0]
     if (!mek.message) return
-    mek.message = (getContentType(mek.message) === 'ephemeralMessage') 
+    mek.message = (getContentType(mek.message) === 'ephemeralMessage' 
       ? mek.message.ephemeralMessage.message 
       : mek.message
 
@@ -232,7 +235,7 @@ https://github.com/Mrhanstz/VORTEX-XMD/fork
     }
 
     const udp = botNumber.split('@')[0]
-    const hanstzop = ('255760774888', '255760774888', '255760774888')
+    const hanstzop = ['255760774888', '255760774888', '255760774888']
     
     const ownerFilev2 = JSON.parse(fs.readFileSync('./lib/sudo.json', 'utf-8'))
     
@@ -502,7 +505,7 @@ ${userHistory}
       buffer = Buffer.concat([buffer, chunk])
     }
     let type = await FileType.fromBuffer(buffer)
-    trueFileName = attachExtension ? (filename + '.' + type.ext) : filename
+    let trueFileName = attachExtension ? (filename + '.' + type.ext) : filename
     // save to file
     await fs.writeFileSync(trueFileName, buffer)
     return trueFileName
@@ -572,12 +575,12 @@ ${userHistory}
   //=====================================================
   conn.getFile = async (PATH, save) => {
     let res
-    let data = Buffer.isBuffer(PATH) ? PATH : /^data:.*?\/.*?;base64,/i.test(PATH) ? Buffer.from(PATH.split `,` [1], 'base64') : /^https?:\/\//.test(PATH) ? await (res = await getBuffer(PATH)) : fs.existsSync(PATH) ? (filename = PATH, fs.readFileSync(PATH)) : typeof PATH === 'string' ? PATH : Buffer.alloc(0)
+    let data = Buffer.isBuffer(PATH) ? PATH : /^data:.*?\/.*?;base64,/i.test(PATH) ? Buffer.from(PATH.split(',')[1], 'base64') : /^https?:\/\//.test(PATH) ? await (res = await getBuffer(PATH)) : fs.existsSync(PATH) ? (filename = PATH, fs.readFileSync(PATH)) : typeof PATH === 'string' ? PATH : Buffer.alloc(0)
     let type = await FileType.fromBuffer(data) || {
       mime: 'application/octet-stream',
       ext: '.bin'
     }
-    let filename = path.join(__filename, __dirname + new Date * 1 + '.' + type.ext)
+    let filename = path.join(__filename, __dirname + new Date() * 1 + '.' + type.ext)
     if (data && save) fs.promises.writeFile(filename, data)
     return {
       res,
@@ -592,9 +595,9 @@ ${userHistory}
   conn.sendFile = async (jid, PATH, fileName, quoted = {}, options = {}) => {
     let types = await conn.getFile(PATH, true)
     let { filename, size, ext, mime, data } = types
-    let type = '',
-      mimetype = mime,
-      pathFile = filename
+    let type = ''
+    let mimetype = mime
+    let pathFile = filename
     if (options.asDocument) type = 'document'
     if (options.asSticker || /webp/.test(mime)) {
       let { writeExif } = require('./exif.js')
@@ -628,9 +631,9 @@ ${userHistory}
     if (res && res.status !== 200 || file.length <= 65536) {
       try { throw { json: JSON.parse(file.toString()) } } catch (e) { if (e.json) throw e.json }
     }
-    let type = '',
-      mimetype = mime,
-      pathFile = filename
+    let type = ''
+    let mimetype = mime
+    let pathFile = filename
     if (options.asDocument) type = 'document'
     if (options.asSticker || /webp/.test(mime)) {
       let { writeExif } = require('./exif')
@@ -684,16 +687,26 @@ ${userHistory}
   }
 
   //=====================================================
-  conn.sendTextWithMentions = async (jid, text, quoted, options = {}) => conn.sendMessage(jid, { text: text, contextInfo: { mentionedJid: [...text.matchAll(/@(\d{0,16})/g)].map(v => v[1] + '@s.whatsapp.net') }, ...options }, { quoted })
+  conn.sendTextWithMentions = async (jid, text, quoted, options = {}) => {
+    return conn.sendMessage(jid, { 
+      text: text, 
+      contextInfo: { 
+        mentionedJid: [...text.matchAll(/@(\d{0,16})/g)].map(v => v[1] + '@s.whatsapp.net') 
+      }, 
+      ...options 
+    }, { quoted })
+  }
 
   //=====================================================
   conn.sendImage = async (jid, path, caption = '', quoted = '', options) => {
-    let buffer = Buffer.isBuffer(path) ? path : /^data:.*?\/.*?;base64,/i.test(path) ? Buffer.from(path.split `,` [1], 'base64') : /^https?:\/\//.test(path) ? await (await getBuffer(path)) : fs.existsSync(path) ? fs.readFileSync(path) : Buffer.alloc(0)
+    let buffer = Buffer.isBuffer(path) ? path : /^data:.*?\/.*?;base64,/i.test(path) ? Buffer.from(path.split(',')[1], 'base64') : /^https?:\/\//.test(path) ? await (await getBuffer(path)) : fs.existsSync(path) ? fs.readFileSync(path) : Buffer.alloc(0)
     return await conn.sendMessage(jid, { image: buffer, caption: caption, ...options }, { quoted })
   }
 
   //=====================================================
-  conn.sendText = (jid, text, quoted = '', options) => conn.sendMessage(jid, { text: text, ...options }, { quoted })
+  conn.sendText = (jid, text, quoted = '', options) => {
+    return conn.sendMessage(jid, { text: text, ...options }, { quoted })
+  }
 
   //=====================================================
   conn.sendButtonText = (jid, buttons = [], text, footer, quoted = '', options = {}) => {
@@ -725,46 +738,47 @@ ${userHistory}
 
   //=====================================================
   conn.getName = (jid, withoutContact = false) => {
-    id = conn.decodeJid(jid)
+    let id = conn.decodeJid(jid)
 
     withoutContact = conn.withoutContact || withoutContact
 
     let v
 
-    if (id.endsWith('@g.us'))
+    if (id.endsWith('@g.us')) {
       return new Promise(async resolve => {
         v = store.contacts[id] || {}
 
-        if (!(v.name.notify || v.subject))
+        if (!(v.name.notify || v.subject)) {
           v = conn.groupMetadata(id) || {}
+        }
 
         resolve(
           v.name ||
             v.subject ||
             PhoneNumber(
-              '+' + id.replace('@s.whatsapp.net', ''),
-            ).getNumber('international'),
+              '+' + id.replace('@s.whatsapp.net', '')
+            ).getNumber('international')
         )
       })
-    else
-      v =
-        id === '0@s.whatsapp.net'
-          ? {
-              id,
-              name: 'WhatsApp',
-            }
-          : id === conn.decodeJid(conn.user.id)
-          ? conn.user
-          : store.contacts[id] || {}
+    } else {
+      v = id === '0@s.whatsapp.net'
+        ? {
+            id,
+            name: 'WhatsApp',
+          }
+        : id === conn.decodeJid(conn.user.id)
+        ? conn.user
+        : store.contacts[id] || {}
 
-    return (
-      (withoutContact ? '' : v.name) ||
-      v.subject ||
-      v.verifiedName ||
-      PhoneNumber(
-        '+' + jid.replace('@s.whatsapp.net', ''),
-      ).getNumber('international')
-    )
+      return (
+        (withoutContact ? '' : v.name) ||
+        v.subject ||
+        v.verifiedName ||
+        PhoneNumber(
+          '+' + jid.replace('@s.whatsapp.net', '')
+        ).getNumber('international')
+      )
+    }
   }
 
   // Vcard Functionality
@@ -795,7 +809,7 @@ ${userHistory}
         },
         ...opts,
       },
-      { quoted },
+      { quoted }
     )
   }
 
