@@ -19,6 +19,7 @@ cmd({
         const video = yt.videos[0];
         if (!video) return reply("Video not found.");
 
+        // Replace with your actual API URL
         const apiUrl = `https://apis.davidcyriltech.my.id/download/ytmp4?url=${encodeURIComponent(video.url)}`;
         const res = await fetch(apiUrl);
         const data = await res.json();
@@ -36,8 +37,8 @@ cmd({
                 forwardingScore: 5,
                 isForwarded: true,
                 forwardedNewsletterMessageInfo: {
-                    newsletterName: "𝐻𝒂𝒏𝒔𝑇𝒆𝒄𝒉",
-                    newsletterJid: "120363352087070233@newsletter"
+                    newsletterName: "𝐁.𝐌.𝐁 𝐗𝐌𝐃 𝐍𝐄𝐓𝐖𝐎𝐑𝐊",
+                    newsletterJid: "120363222396315098@newsletter"
                 }
             }
         }, { quoted: mek });
