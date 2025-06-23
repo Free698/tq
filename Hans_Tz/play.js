@@ -1,9 +1,9 @@
 const config = require('../config');
 const { cmd } = require('../command');
 const fetch = require('node-fetch');
-const yts = require("yt-search"); // Make sure yt-search is installed
+const yts = require("yt-search"); // Install with: npm install yt-search
 
-// Your exact contextInfo for both audio and video
+// Your strict contextInfo structure for both audio and video
 function getContextInfo(title, thumbnail, url) {
     return {
         forwardingScore: 999,
@@ -25,7 +25,7 @@ function getContextInfo(title, thumbnail, url) {
     };
 }
 
-// Audio command
+// 🎵 Audio Command - .play
 cmd({
     pattern: "play",
     alias: ["ytplay", "ytmusic"],
@@ -62,12 +62,12 @@ cmd({
     }
 });
 
-// Video command
+// 🎬 Video Command - .video
 cmd({
     pattern: "video",
     alias: ["ytvideo", "ytmp4"],
     use: ".video <song name>",
-    desc: "Play a video from YouTube.",
+    desc: "Download video from YouTube.",
     category: "video",
     react: "🎬",
     filename: __filename
@@ -78,11 +78,11 @@ cmd({
         const yt = await yts(text);
         if (!yt?.videos?.length) return reply("❌ Video not found.");
 
-        const ytsResult = yt.videos[0];
-        const apiUrl = `https://apis.davidcyriltech.my.id/download/ytmp4?url=${encodeURIComponent(ytsResult.url)}`;
+        const video = yt.videos[0];
+        const apiUrl = `https://apis.davidcyriltech.my.id/download/ytmp4?url=${encodeURIComponent(video.url)}`;
 
-        const response = await fetch(apiUrl);
-        const data = await response.json();
+        const res = await fetch(apiUrl);
+        const data = await res.json();
 
         if (data.status !== 200 || !data.success || !data.result.download_url) {
             return reply("❌ Failed to fetch the video. Please try again later.");
@@ -90,9 +90,9 @@ cmd({
 
         await conn.sendMessage(from, {
             video: { url: data.result.download_url },
-            fileName: `${ytsResult.title}.mp4`,
+            fileName: `${video.title}.mp4`,
             mimetype: 'video/mp4',
-            contextInfo: getContextInfo(ytsResult.title, ytsResult.thumbnail, ytsResult.url)
+            contextInfo: getContextInfo(video.title, video.thumbnail, video.url)
         }, { quoted: mek });
 
     } catch (err) {
