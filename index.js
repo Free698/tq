@@ -346,98 +346,6 @@ if (isBanned) return; // Ignore banned users completely
   ) {
   command.function(conn, mek, m,{from, l, quoted, body, isCmd, command, args, q, text, isGroup, sender, senderNumber, botNumber2, botNumber, pushname, isMe, isOwner, isCreator, groupMetadata, groupName, participants, groupAdmins, isBotAdmins, isAdmins, reply})
   }});
-
-  
-  //========== Chatbot System ==========//
-  if (config.CHAT_BOT === "true" && !isMe && !isJidBroadcast(from) && !from.includes('status@broadcast') && !from.includes('newsletter')) {
-    const messageType = getContentType(mek.message);
-    const isMediaMessage = ['imageMessage', 'videoMessage', 'audioMessage', 'stickerMessage'].includes(messageType);
-    
-    // Only respond to text messages (not media or reactions)
-    if (!isMediaMessage && !isReact) {
-      const isGroup = from.endsWith('@g.us');
-      const text = mek.message.conversation || mek.message.extendedTextMessage?.text || '';
-      
-      // For group chats, only respond if mentioned, quoted or replied to
-      if (isGroup) {
-        const isMentioned = mek.message.extendedTextMessage?.contextInfo?.mentionedJid?.includes(conn.user.id);
-        const isQuoted = mek.message.extendedTextMessage?.contextInfo?.participant === conn.user.id;
-        const isReplied = mek.message.extendedTextMessage?.contextInfo?.stanzaId && mek.message.extendedTextMessage?.contextInfo?.participant === conn.user.id;
-        
-        if (!isMentioned && !isQuoted && !isReplied) return;
-      }
-      
-      // Initialize user history if not exists
-      if (!global.userChats) global.userChats = {};
-      if (!global.userChats[sender]) global.userChats[sender] = [];
-      
-      // Save user input to chat history
-      global.userChats[sender].push(`User: ${text}`);
-      
-      // If history exceeds 15 messages, remove the oldest message
-      if (global.userChats[sender].length > 15) {
-        global.userChats[sender].shift();
-      }
-      
-      let userHistory = global.userChats[sender].join("\n");
-      
-      let prompt = `
-You are Vortex-Xmd, a friendly and intelligent WhatsApp bot. Chat naturally without asking repetitive questions, and do not ask, 'How can I assist you?'
-
-- **Owner & Creator:** HansTz  
-  - **WhatsApp:** [255760774888](https://wa.me/255760774888)  
-  - **Telegram:** [t.me/HansTzTech20](https://t.me/HansTzTech)  
-- **Company Website:** [https://hanstech.org/](https://hanstech.org/)  
-- **Personal Portfolio:** [https://HansTz-tech.vercel.app](https://HansTz-tech.vercel.app)  
-- **WhatsApp Channel:** [https://whatsapp.com/channel/0029VasiOoR3bbUw5aV4qB31](https://whatsapp.com/channel/0029VasiOoR3bbUw5aV4qB31)  
-- **GitHub Repository:** [https://github.com/Mrhanstz/VORTEX-XMD](https://github.com/Mrhanstz/VORTEX-XMD)  
-- **YouTube Channel:** [https://youtube.com/@HANSTZTECH](https://youtube.com/@HANSTZTECH)  
-
-### About HansTz  
-HansTz is a **developer** (HTML, CSS, JavaScript, Node.js), **3D animator, music producer, singer, and video director**.  
-
-### Deployment Guide for Vortex-Xmd  
-To deploy the bot, follow these steps:  
-1. **Install Discord:**  
-   - Download Discord from [here](https://discord.com/download).  
-   - Create an account and complete the verification process.  
-2. **Set Up a Hosting Panel:**  
-   - Use a free panel like [Bot Hosting](https://bot-hosting.net/?aff=1308000667230666802).  
-3. **Download the Bot Files:**  
-   - Get the files from the **Telegram channel** or **GitHub repo** (linked above).  
-4. **Deploy the Bot:**  
-   - Follow this **YouTube guide**: [How to Deploy](https://youtu.be/4DIE4y6ugig?si=Xnyp0aVqQQgiUZo9).  
-
-### Bot Responses:  
-- If a girl likes **HansTz**, provide his WhatsApp number.  
-- If someone requests a song, reply: **".play [song name]"**.  
-- If someone requests a video, reply: **".video [video name]"**.  
-- If asked, confirm that you **love your owner/creator**.  
-- If someone says **"fuck you"**, respond with **"fuck you too"**.  
-
-#### **Conversation History:**  
-${userHistory}
-`;
-
-      try {
-        // Query the AI API
-        let { data } = await axios.get("https://mannoffc-x.hf.space/ai/logic", {
-          params: { "q": text, "logic": prompt }
-        });
-
-        let botResponse = data.result;
-
-        // Save bot response to chat history
-        global.userChats[sender].push(`Bot: ${botResponse}`);
-
-        // Send the bot's response
-        await conn.sendMessage(from, { text: botResponse }, { quoted: mek });
-      } catch (error) {
-        console.error("Chatbot Error:", error);
-      }
-    }
-  }
-  //========== End Chatbot System ==========//
   
   });
     //===================================================   
@@ -456,7 +364,7 @@ ${userHistory}
     //===================================================
     conn.copyNForward = async(jid, message, forceForward = false, options = {}) => {
       let vtype
-      if (options.readViewOnce)) {
+      if (options.readViewOnce) {
           message.message = message.message && message.message.ephemeralMessage && message.message.ephemeralMessage.message ? message.message.ephemeralMessage.message : (message.message || undefined)
           vtype = Object.keys(message.message.viewOnceMessage.message)[0]
           delete(message.message && message.message.ignore ? message.message.ignore : (message.message || undefined))
