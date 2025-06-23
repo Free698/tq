@@ -37,8 +37,8 @@ cmd({
                 forwardingScore: 5,
                 isForwarded: true,
                 forwardedNewsletterMessageInfo: {
-                    newsletterName: "𝐁.𝐌.𝐁 𝐗𝐌𝐃 𝐍𝐄𝐓𝐖𝐎𝐑𝐊",
-                    newsletterJid: "120363222396315098@newsletter"
+                    newsletterName: "𝐕𝐎𝐑𝐓𝐄𝐗-𝐗𝐌𝐃",
+                    newsletterJid: "120363352087070233@newsletter"
                 }
             }
         }, { quoted: mek });
