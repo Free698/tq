@@ -1,104 +1,119 @@
-const config = require('../config');
-const { cmd, commands } = require('../command');
+const { cmd } = require("../command");
 const axios = require('axios');
-const cheerio = require('cheerio');
+const cheerio = require("cheerio");
+const fs = require('fs');
+const path = require("path");
+const AdmZip = require('adm-zip');
+const { URL } = require("url");
+
+module.exports = {
+  pattern: 'getsource',
+  alias: ["web"],
+  react: ['🌐'],
+  desc: "Get HTML + CSS + JS from a website",
+  category: "tools",
+  filename: __filename,
+};
 
 cmd({
-    pattern: "web",
-    alias: ["scrape", "source"],
-    use: ".web <url>",
-    desc: "Fetch full HTML, CSS, JS and media from a webpage as message.",
-    category: "web",
-    react: "🌍",
-    filename: __filename
-},
-async (conn, mek, m, { from, quoted, sender, reply, args }) => {
-    try {
-        const start = new Date().getTime();
-
-        const reactionEmojis = ['🌐', '💾', '📄', '🧠', '📡'];
-        const textEmojis = ['📰', '📃', '📜', '🧾', '💻'];
-
-        const reactionEmoji = reactionEmojis[Math.floor(Math.random() * reactionEmojis.length)];
-        let textEmoji = textEmojis[Math.floor(Math.random() * textEmojis.length)];
-        while (textEmoji === reactionEmoji) {
-            textEmoji = textEmojis[Math.floor(Math.random() * textEmojis.length)];
-        }
-
-        await conn.sendMessage(from, {
-            react: { text: textEmoji, key: mek.key }
-        });
-
-        const url = args[0];
-        if (!url || !/^https?:\/\//.test(url)) {
-            return reply("❌ Please provide a valid URL that starts with http:// or https://");
-        }
-
-        const res = await axios.get(url);
-        const html = res.data;
-        const $ = cheerio.load(html);
-
-        const cssLinks = [];
-        const jsLinks = [];
-        const mediaLinks = [];
-
-        $('link[rel="stylesheet"]').each((_, el) => {
-            const href = $(el).attr('href');
-            if (href) cssLinks.push(new URL(href, url).href);
-        });
-
-        $('script[src]').each((_, el) => {
-            const src = $(el).attr('src');
-            if (src) jsLinks.push(new URL(src, url).href);
-        });
-
-        $('img[src], audio[src], video[src]').each((_, el) => {
-            const src = $(el).attr('src');
-            if (src) mediaLinks.push(new URL(src, url).href);
-        });
-
-        // 🔹 Split long content into chunks
-        const sendInChunks = async (label, content, maxLen = 4000) => {
-            const chunks = content.match(new RegExp(`.{1,${maxLen}}`, 'gs'));
-            for (let i = 0; i < chunks.length; i++) {
-                await conn.sendMessage(from, {
-                    text: `📦 *${label}* (Part ${i + 1}/${chunks.length}):\n\n${chunks[i]}`
-                }, { quoted: mek });
-            }
-        };
-
-        await sendInChunks("HTML Content", html);
-
-        for (const cssURL of cssLinks) {
-            try {
-                const css = await axios.get(cssURL);
-                await sendInChunks(`CSS: ${cssURL}`, css.data);
-            } catch (e) {
-                await reply(`⚠️ Failed to load CSS from: ${cssURL}`);
-            }
-        }
-
-        for (const jsURL of jsLinks) {
-            try {
-                const js = await axios.get(jsURL);
-                await sendInChunks(`JS: ${jsURL}`, js.data);
-            } catch (e) {
-                await reply(`⚠️ Failed to load JS from: ${jsURL}`);
-            }
-        }
-
-        if (mediaLinks.length > 0) {
-            await sendInChunks("Media Files", mediaLinks.join('\n'));
-        } else {
-            await reply("⚠️ No media files found.");
-        }
-
-        const end = new Date().getTime();
-        const timeTaken = ((end - start) / 1000).toFixed(2);
-        await reply(`✅ *Completed in ${timeTaken}s* ${reactionEmoji}`);
-
-    } catch (err) {
-        console.error("Error in .web command:", err);
-        reply(`❌ Error: ${err.message}`);
+  pattern: 'getsource',
+  alias: ["web"],
+  react: ['🌐'],
+  desc: "Get HTML + CSS + JS from a website",
+  category: "tools",
+  filename: __filename,
+}, async (m, sock, match, { reply }) => {
+  try {
+    const inputUrl = match?.trim()?.split(" ")[1];
+    if (!inputUrl) {
+      return reply("❌ Please provide a website URL.\n\nExample: `.getsource https://example.com`");
     }
+
+    const targetUrl = inputUrl.startsWith('http') ? inputUrl : 'https://' + inputUrl;
+    const isValidUrl = /^https?:\/\/[^\s/$.?#].[^\s]*$/i.test(targetUrl);
+    if (!isValidUrl) {
+      return reply("❌ Invalid URL format.");
+    }
+
+    await reply("⏳ Fetching HTML, CSS, and JS...");
+
+    // Fetch website HTML
+    const response = await axios.get(targetUrl, {
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3'
+      },
+      timeout: 30000,
+    });
+    const htmlContent = response.data;
+
+    // Create temporary directory
+    const tempDir = path.join(__dirname, `website_source_${Date.now()}`);
+    fs.mkdirSync(tempDir, { recursive: true });
+    const htmlPath = path.join(tempDir, "index.html");
+    fs.writeFileSync(htmlPath, htmlContent);
+
+    // Parse HTML for assets
+    const $ = cheerio.load(htmlContent);
+    const baseUrl = new URL(targetUrl);
+    const downloadQueue = [];
+
+    const downloadAsset = async (assetUrl, fileName) => {
+      try {
+        const absoluteUrl = new URL(assetUrl, baseUrl).href;
+        const assetResponse = await axios.get(absoluteUrl, {
+          responseType: 'arraybuffer',
+          timeout: 15000,
+        });
+        
+        const safeFileName = fileName.replace(/[^a-z0-9_.]/gi, '_').substring(0, 100);
+        const filePath = path.join(tempDir, safeFileName);
+        fs.writeFileSync(filePath, assetResponse.data);
+      } catch (error) {
+        console.warn(`❌ Failed to download asset: ${assetUrl}`, error.message);
+      }
+    };
+
+    // Find and download CSS
+    $('link[rel="stylesheet"]').each((i, el) => {
+      const href = $(el).attr('href');
+      if (href) {
+        const fileName = path.basename(href.split('?')[0]) || `style_${i}.css`;
+        downloadQueue.push(downloadAsset(href, fileName));
+      }
+    });
+
+    // Find and download JS
+    $('script[src]').each((i, el) => {
+      const src = $(el).attr('src');
+      if (src) {
+        const fileName = path.basename(src.split('?')[0]) || `script_${i}.js`;
+        downloadQueue.push(downloadAsset(src, fileName));
+      }
+    });
+
+    // Process all downloads
+    await Promise.all(downloadQueue);
+
+    // Create ZIP archive
+    const zip = new AdmZip();
+    zip.addLocalFolder(tempDir);
+    const zipPath = path.join(__dirname, `website_${Date.now()}.zip`);
+    zip.writeZip(zipPath);
+
+    // Send result
+    await sock.sendMessage(m.chat, {
+      document: fs.readFileSync(zipPath),
+      fileName: "website-source.zip",
+      mimetype: "application/zip",
+      caption: `📁 Source code from: ${targetUrl}\n\n> 𝐕𝐎𝐑𝐓𝐄𝐗-𝐗𝐌𝐃`
+    }, { quoted: m });
+
+    // Cleanup
+    fs.rmSync(tempDir, { recursive: true, force: true });
+    fs.unlinkSync(zipPath);
+
+  } catch (error) {
+    console.error("Error in getsource command:", error);
+    reply("❌ Failed to fetch website source. Please check the URL and try again.");
+  }
 });
