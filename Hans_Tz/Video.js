@@ -2,12 +2,11 @@ const { cmd } = require('../command');
 const fetch = require('node-fetch');
 const yts = require('yt-search');
 
-// Video command
 cmd({
     pattern: "video",
     alias: ["ytvideo", "ytmp4"],
     use: ".video <video name>",
-    desc: "Download YouTube video.",
+    desc: "Download YouTube video",
     category: "video",
     react: "🎬",
     filename: __filename
@@ -19,7 +18,6 @@ cmd({
         const video = yt.videos[0];
         if (!video) return reply("Video not found.");
 
-        // Replace with your actual API URL
         const apiUrl = `https://apis.davidcyriltech.my.id/download/ytmp4?url=${encodeURIComponent(video.url)}`;
         const res = await fetch(apiUrl);
         const data = await res.json();
@@ -28,19 +26,24 @@ cmd({
             return reply("Video download failed.");
         }
 
+        // Send video with contextInfo but NO caption
         await conn.sendMessage(from, {
             video: { url: data.result.download_url },
             fileName: `${video.title}.mp4`,
             mimetype: "video/mp4",
-            caption: `🎥 *${video.title}*\n\n⏳ Duration: ${video.timestamp}\n👀 Views: ${video.views}\n📅 Uploaded: ${video.ago}\n\n🔗 ${video.url}`,
             contextInfo: {
                 forwardingScore: 5,
                 isForwarded: true,
                 forwardedNewsletterMessageInfo: {
-                    newsletterName: "𝐕𝐎𝐑𝐓𝐄𝐗-𝐗𝐌𝐃",
+                    newsletterName: "𝐻𝒂𝒏𝒔𝑇𝒆𝒄𝒉",
                     newsletterJid: "120363352087070233@newsletter"
                 }
             }
+        }, { quoted: mek });
+
+        // Separately send the video info as text
+        await conn.sendMessage(from, {
+            text: `🎥 *${video.title}*\n\n⏳ Duration: ${video.timestamp}\n👀 Views: ${video.views}\n📅 Uploaded: ${video.ago}\n\n🔗 ${video.url}`
         }, { quoted: mek });
 
     } catch (err) {
