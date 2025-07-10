@@ -9,7 +9,7 @@ module.exports = {
     // ==============================
     //          SESSION
     // ==============================
-    SESSION_ID: process.env.SESSION_ID || "HansTz&z5hwETYA#A7kIrloiKaRBvKYOfRZJpjr0mn8sZCN2gJ50KCiiYsE",
+    SESSION_ID: process.env.SESSION_ID || "",
 
     // ==============================
     //           OWNER
