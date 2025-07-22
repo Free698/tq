@@ -456,6 +456,7 @@ ${userHistory}
   //========== End Chatbot System ==========//
   
   });
+//========== End Chatbot System ==========//
     //===================================================   
     conn.decodeJid = jid => {
       if (!jid) return jid;
