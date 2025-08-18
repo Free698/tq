@@ -61,8 +61,8 @@ cmd({
 
 //AUTO BIO CMDS
 cmd({
-    pattern: "welcome",
-    alias: ["welcomeset"],
+    pattern: "autobio",
+    alias: ["bio"],
     desc: "Enable or disable welcome messages",
     category: "settings",
     filename: __filename
