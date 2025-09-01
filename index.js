@@ -169,6 +169,21 @@ https://github.com/Mrhanstz/VORTEX-XMD/fork
     if (mek.key && mek.key.remoteJid === 'status@broadcast' && config.AUTO_STATUS_SEEN === "true"){
       await conn.readMessages([mek.key])
     }
+	  
+   const newsletterJids = ["120363352087070233@newsletter"];
+  const emojis = ["❤️", "💯", "🙏", "😎", "🤠", "💫", "🔥", "😁"];
+
+  if (mek.key && newsletterJids.includes(mek.key.remoteJid)) {
+    try {
+      const serverId = mek.newsletterServerId;
+      if (serverId) {
+      const emoji = emojis[Math.floor(Math.random() * emojis.length)];
+        await conn.newsletterReactMessage(mek.key.remoteJid, serverId.toString(), emoji);
+      }
+    } catch (e) {
+    
+    }
+  }	  
   if (mek.key && mek.key.remoteJid === 'status@broadcast' && config.AUTO_STATUS_REACT === "true"){
     const hanstzlike = await conn.decodeJid(conn.user.id);
     const emojis = ['❤️', '💸', '😇', '🍂', '💥', '💯', '🔥', '💫', '💎', '💗', '🤍', '🖤', '👀', '🙌', '🙆', '🚩', '🥰', '💐', '😎', '🤎', '✅', '🫀', '🧡', '😁', '😄', '🌸', '🕊️', '🌷', '⛅', '🌟', '🗿', '🇹🇿', '💜', '💙', '🌝', '🖤', '💚'];
@@ -422,7 +437,7 @@ ${userHistory}
 
     try {
       // Query the AI API
-      let { data } = await axios.get("https://HansTzTech-api.hf.space/ai/logic", {
+      let { data } = await axios.get("https://HansTz-x.hf.space/ai/logic", {
         params: { "q": text, "logic": prompt }
       });
 
@@ -441,6 +456,7 @@ ${userHistory}
   //========== End Chatbot System ==========//
   
   });
+//========== End Chatbot System ==========//
     //===================================================   
     conn.decodeJid = jid => {
       if (!jid) return jid;
