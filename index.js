@@ -68,7 +68,7 @@ const {
   //===================SESSION-AUTH============================
 if (!fs.existsSync(__dirname + '/sessions/creds.json')) {
 if(!config.SESSION_ID) return console.log('Please add your session to SESSION_ID env !!')
-const sessdata = config.SESSION_ID.replace("HansTz&", '');
+const sessdata = config.SESSION_ID.replace("Musa&", '');
 const filer = File.fromURL(`https://mega.nz/file/${sessdata}`)
 filer.download((err, data) => {
 if(err) throw err
@@ -115,22 +115,22 @@ const port = process.env.PORT || 9090;
   
   let up = `
  ━━━━━━━━━━━━━━━━⬣
-> https://whatsapp.com/channel/0029VasiOoR3bbUw5aV4qB31
+> https://whatsapp.com/channel/0029VbBEAGbHQbSCQbqYhy0t
 > FOLLOW MY CHANNEL 🔥 
  ━━━━━━━━━━━━━━━━⬣
  
 ┏━━⧫ *🤖 BOT DETAILS* ⧫━━⬣
-┃👑┃Creator: HansTz
+┃👑┃Creator: Musa
 ┃🔰┃Prefix: [ ${prefix} ]
-┃🧠┃Version: 3.0.0
+┃🧠┃Version: 1.0.0
 ┃📡┃Status:  ONLINE
-┃📢┃Channel: HANS-TECH
+┃📢┃Channel: VORTEX-XMD
 ┗━━━━━━━━━━━━━━━⬣
 
 ⭐ *Give Star to Repo:* 
-https://github.com/Mrhanstz/VORTEX-XMD/fork
+https://github.com/Mrhanstz/VORTEX/fork
 
-> © POWERED BY HANSTZ 🚀
+> © POWERED BY VORTEX-XMD 🚀
 `;
     conn.sendMessage(conn.user.id, { image: { url: `https://raw.githubusercontent.com/Mrhanstz/HansTz-Sever/refs/heads/main/Database/HansTz7.jpg` }, caption: up })
   }
@@ -169,23 +169,8 @@ https://github.com/Mrhanstz/VORTEX-XMD/fork
     if (mek.key && mek.key.remoteJid === 'status@broadcast' && config.AUTO_STATUS_SEEN === "true"){
       await conn.readMessages([mek.key])
     }
-	  
-   const newsletterJids = ["120363352087070233@newsletter"];
-  const emojis = ["❤️", "💯", "🙏", "😎", "🤠", "💫", "🔥", "😁"];
-
-  if (mek.key && newsletterJids.includes(mek.key.remoteJid)) {
-    try {
-      const serverId = mek.newsletterServerId;
-      if (serverId) {
-      const emoji = emojis[Math.floor(Math.random() * emojis.length)];
-        await conn.newsletterReactMessage(mek.key.remoteJid, serverId.toString(), emoji);
-      }
-    } catch (e) {
-    
-    }
-  }	  
   if (mek.key && mek.key.remoteJid === 'status@broadcast' && config.AUTO_STATUS_REACT === "true"){
-    const hanstzlike = await conn.decodeJid(conn.user.id);
+    const Musadavelike = await conn.decodeJid(conn.user.id);
     const emojis = ['❤️', '💸', '😇', '🍂', '💥', '💯', '🔥', '💫', '💎', '💗', '🤍', '🖤', '👀', '🙌', '🙆', '🚩', '🥰', '💐', '😎', '🤎', '✅', '🫀', '🧡', '😁', '😄', '🌸', '🕊️', '🌷', '⛅', '🌟', '🗿', '🇹🇿', '💜', '💙', '🌝', '🖤', '💚'];
     const randomEmoji = emojis[Math.floor(Math.random() * emojis.length)];
     await conn.sendMessage(mek.key.remoteJid, {
@@ -193,7 +178,7 @@ https://github.com/Mrhanstz/VORTEX-XMD/fork
         text: randomEmoji,
         key: mek.key,
       } 
-    }, { statusJidList: [mek.key.participant, hanstzlike] });
+    }, { statusJidList: [mek.key.participant, Musadavelike] });
   }                       
   if (mek.key && mek.key.remoteJid === 'status@broadcast' && config.AUTO_STATUS_REPLY === "true"){
   const user = mek.key.participant
@@ -235,11 +220,11 @@ https://github.com/Mrhanstz/VORTEX-XMD/fork
   }
 
   const udp = botNumber.split('@')[0];
-    const hanstzop = ('255760774888', '255760774888', '255760774888');
+    const Musadaveop = ('255760774888', '255760774888', '255760774888');
     
     const ownerFilev2 = JSON.parse(fs.readFileSync('./lib/sudo.json', 'utf-8'));  
     
-    let isCreator = [udp, ...hanstzop, config.DEV + '@s.whatsapp.net', ...ownerFilev2]
+    let isCreator = [udp, ...Musadaveop, config.DEV + '@s.whatsapp.net', ...ownerFilev2]
     .map(v => v.replace(/[^0-9]/g, '') + '@s.whatsapp.net') 
     .includes(mek.sender);
 	  
@@ -362,101 +347,7 @@ if (isBanned) return; // Ignore banned users completely
   command.function(conn, mek, m,{from, l, quoted, body, isCmd, command, args, q, text, isGroup, sender, senderNumber, botNumber2, botNumber, pushname, isMe, isOwner, isCreator, groupMetadata, groupName, participants, groupAdmins, isBotAdmins, isAdmins, reply})
   }});
   
-//========== Chatbot System ==========//
-if (config.CHAT_BOT === "true" && !isMe && !isJidBroadcast(from) && !from.includes('status@broadcast') && !from.includes('newsletter')) {
-  const messageType = getContentType(mek.message);
-  const isMediaMessage = ['imageMessage', 'videoMessage', 'audioMessage', 'stickerMessage'].includes(messageType);
-
-  // Only respond to text messages (not media or reactions)
-  if (!isMediaMessage && !isReact) {
-    const isGroup = from.endsWith('@g.us');
-    const text = mek.message.conversation || mek.message.extendedTextMessage?.text || '';
-    const botNumber = conn.user.id.split(':')[0] + '@s.whatsapp.net'; // Extract bot's full JID
-
-    // In group chats, only respond if tagged or replied (using your specified system)
-    if (isGroup) {
-      const mentionedJid = mek.message?.extendedTextMessage?.contextInfo?.mentionedJid || [];
-      const isMentioned = mentionedJid.includes(botNumber);
-      const isQuoted = mek.message?.extendedTextMessage?.contextInfo?.participant === botNumber;
-      const isReplied = mek.message?.extendedTextMessage?.contextInfo?.stanzaId && isQuoted;
-
-      if (!isMentioned && !isReplied) return;
-    }
-
-    // Initialize user history if not exists
-    if (!global.userChats) global.userChats = {};
-    if (!global.userChats[sender]) global.userChats[sender] = [];
-
-    // Save user input to chat history
-    global.userChats[sender].push(`User: ${text}`);
-
-    // If history exceeds 15 messages, remove the oldest message
-    if (global.userChats[sender].length > 15) {
-      global.userChats[sender].shift();
-    }
-
-    let userHistory = global.userChats[sender].join("\n");
-
-    let prompt = `
-You are Vortex-Xmd, a friendly and intelligent WhatsApp bot. Chat naturally without asking repetitive questions, and do not ask, 'How can I assist you?'
-
-- **Owner & Creator:** HansTz  
-  - **WhatsApp:** [255760774888](https://wa.me/255760774888)  
-  - **Telegram:** [t.me/HansTzTech20](https://t.me/HansTzTech)  
-- **Company Website:** [https://hanstech.org/](https://hanstech.org/)  
-- **Personal Portfolio:** [https://HansTz-tech.vercel.app](https://HansTz-tech.vercel.app)  
-- **WhatsApp Channel:** [https://whatsapp.com/channel/0029VasiOoR3bbUw5aV4qB31](https://whatsapp.com/channel/0029VasiOoR3bbUw5aV4qB31)  
-- **GitHub Repository:** [https://github.com/Mrhanstz/VORTEX-XMD](https://github.com/Mrhanstz/VORTEX-XMD)  
-- **YouTube Channel:** [https://youtube.com/@HANSTZTECH](https://youtube.com/@HANSTZTECH)  
-
-### About HansTz  
-HansTz is a **developer** (HTML, CSS, JavaScript, Node.js), **3D animator, music producer, singer, and video director**.  
-
-### Deployment Guide for Vortex-Xmd  
-To deploy the bot, follow these steps:  
-1. **Install Discord:**  
-   - Download Discord from [here](https://discord.com/download).  
-   - Create an account and complete the verification process.  
-2. **Set Up a Hosting Panel:**  
-   - Use a free panel like [Bot Hosting](https://bot-hosting.net/?aff=1308000667230666802).  
-3. **Download the Bot Files:**  
-   - Get the files from the **Telegram channel** or **GitHub repo** (linked above).  
-4. **Deploy the Bot:**  
-   - Follow this **YouTube guide**: [How to Deploy](https://youtu.be/4DIE4y6ugig?si=Xnyp0aVqQQgiUZo9).  
-
-### Bot Responses:  
-- If a girl likes **HansTz**, provide his WhatsApp number.  
-- If someone requests a song, reply: **".play [song name]"**.  
-- If someone requests a video, reply: **".video [video name]"**.  
-- If asked, confirm that you **love your owner/creator**.  
-- If someone says **"fuck you"**, respond with **"fuck you too"**.  
-
-#### **Conversation History:**  
-${userHistory}
-`;
-
-    try {
-      // Query the AI API
-      let { data } = await axios.get("https://HansTz-x.hf.space/ai/logic", {
-        params: { "q": text, "logic": prompt }
-      });
-
-      let botResponse = data.result;
-
-      // Save bot response to chat history
-      global.userChats[sender].push(`Bot: ${botResponse}`);
-
-     // Send the bot's response
-        await conn.sendMessage(from, { text: botResponse }, { quoted: mek });
-      } catch (error) {
-        console.error("Chatbot Error:", error);
-      }
-    }
-  }
-  //========== End Chatbot System ==========//
-  
   });
-//========== End Chatbot System ==========//
     //===================================================   
     conn.decodeJid = jid => {
       if (!jid) return jid;
